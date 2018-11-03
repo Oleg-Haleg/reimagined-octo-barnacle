@@ -1,0 +1,12 @@
+﻿#/Debug
+/lst
+/obj
+/.settings/*
+/*.bak
+/*.dep
+/*.uvgui
+/*.uvgui.*
+/*.uvopt
+/EventRecorderStub.scvd
+/unused
+/*.tmp
