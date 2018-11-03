@@ -62,21 +62,21 @@ void init_USART1(void)
 	
   // USART1_TX, TIM1_CH2
   structGPIO.GPIO_Pin  = GPIO_Pin_9;
-  structGPIO.GPIO_Mode = GPIO_Mode_Out_PP; // Check
+  structGPIO.GPIO_Mode = GPIO_Mode_AF_PP;
   GPIO_Init(GPIOA, &structGPIO);
   // USART1_RX, TIM1_CH3
   structGPIO.GPIO_Pin  = GPIO_Pin_10; 
-  structGPIO.GPIO_Mode = GPIO_Mode_AF_PP; // Check
+  structGPIO.GPIO_Mode = GPIO_Mode_IN_FLOATING;
   GPIO_Init(GPIOA, &structGPIO);
 	
-  // PA9_10 - USART1
+  // USART initialization
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1 , ENABLE);
   
   USART_InitTypeDef structUSART;
   
   USART_StructInit(&structUSART);
-  structUSART.USART_BaudRate = 115200; // Is it correct baud?
+  structUSART.USART_BaudRate = 9600; // Is it correct baud?
   USART_Init(USART1, &structUSART);
   
   USART_ITConfig(USART1, USART_IT_RXNE, ENABLE); // Turns on RX interrupt
