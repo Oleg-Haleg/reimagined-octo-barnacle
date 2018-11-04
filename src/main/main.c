@@ -1,4 +1,4 @@
-﻿/*******************************************************************************************************
+/*******************************************************************************************************
 Definition: The main file for h/w on programming microcontrollers
 Developer: Trishin Vadim
 Notes: Peripherals used: USART1, ADC1, TIM1, GPIO
@@ -10,27 +10,18 @@ Notes: Peripherals used: USART1, ADC1, TIM1, GPIO
 *******************************************************************************************************/
 
 #include "mcu_support_package/inc/stm32f10x.h"
-#include <stm32f10x.h>
-#include "stm32f10x_gpio.h"
-#include "stm32f10x_rcc.h"
+//#include <stm32f10x.h>
+//#include "stm32f10x_gpio.h"
+//#include "stm32f10x_rcc.h"
 //#include "stm32f10x_adc.h"
 //#include <string.h>
-//kvakazyabra
 
 #include "lab_functions/debug.h"
 #include "lab_functions/motor_voltage.h"
 #include "lab_functions/motor_speed.h"
 #include "lab_functions/control.h"
 
-// USART1
-// ADC1
-// TIM1
-// GPIO
-
-//lets have fun
-
 void init_GPIO(void);
-void init_TIM1(void);
 void init_ADC1(void);
 /***************************************************************************************************
 Global functions

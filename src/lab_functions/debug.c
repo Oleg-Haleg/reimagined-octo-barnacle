@@ -85,30 +85,35 @@ void debug_init(void)
   // Turns on RX interrupt
   USART_ITConfig(USART1, USART_IT_RXNE, ENABLE); 
 //  USART_ITConfig(USART1, USART_IT_TXE, ENABLE);
+	NVIC_SetPriority(USART1_IRQn, 2);
 	NVIC_EnableIRQ(USART1_IRQn);
   
   USART_Cmd(USART1, ENABLE);
   
+  //*************** Initializating SysTick
+  SysTick_Config(SystemCoreClock); // One timer tick per second
+	NVIC_SetPriority(SysTick_IRQn, 4);
+
   //*************** Initializating TIM 
-  const uint16_t period = 1000; // Period 1s (period = 1000 ticks of timer i.e. 1 seconds)
-	const uint16_t freq = 1000; // Frequency 1ms (1 timer tick per 1 milisecond)
-	
-  RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1,ENABLE);
-  
-	TIM_TimeBaseInitTypeDef structTIM;
-  TIM_TimeBaseStructInit(&structTIM);
-	structTIM.TIM_Period = period - 1;
-	structTIM.TIM_Prescaler = SystemCoreClock / freq - 1;
-	TIM_TimeBaseInit(TIM1, &structTIM);
-	 
-  // Configure timer on interrupting by update 
-	TIM_ITConfig(TIM1, TIM_IT_Update, ENABLE);
-//	NVIC_SetPriority(TIM1_UP_IRQn, 2);
-  // Enable interrupting from TIM1
-	NVIC_EnableIRQ(TIM1_UP_IRQn);
-	
-  // Turns on timer
-	TIM_Cmd(TIM1, ENABLE);
+//  const uint16_t period = 1000; // Period 1s (period = 1000 ticks of timer i.e. 1 seconds)
+//	const uint16_t freq = 1000; // Frequency 1ms (1 timer tick per 1 milisecond)
+//	
+//  RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1,ENABLE);
+//  
+//	TIM_TimeBaseInitTypeDef structTIM;
+//  TIM_TimeBaseStructInit(&structTIM);
+//	structTIM.TIM_Period = period - 1;
+//	structTIM.TIM_Prescaler = SystemCoreClock / freq - 1;
+//	TIM_TimeBaseInit(TIM1, &structTIM);
+//	 
+//  // Configure timer on interrupting by update 
+//	TIM_ITConfig(TIM1, TIM_IT_Update, ENABLE);
+////	NVIC_SetPriority(TIM1_UP_IRQn, 2);
+//  // Enable interrupting from TIM1
+//	NVIC_EnableIRQ(TIM1_UP_IRQn);
+//	
+//  // Turns on timer
+//	TIM_Cmd(TIM1, ENABLE);
 }
 
 /**************************************************************************************************
@@ -159,51 +164,34 @@ void USART1_IRQHandler(void)
     {
       mem_speed(receivedData, true);
     }
-    TIM_Cmd(TIM1, ENABLE);
+    NVIC_EnableIRQ(SysTick_IRQn);
+    //TIM_Cmd(TIM1, ENABLE);
     waitForVelocity = false;
   }
   else if (receivedData == 'b')
   {
-    TIM_Cmd(TIM1, DISABLE);
+    NVIC_DisableIRQ(SysTick_IRQn);
+    //TIM_Cmd(TIM1, DISABLE);
     waitForVelocity = true;
   }
 }
 
 /**************************************************************************************************
-Definition: Interrupt from TIM 
+Definition: Interrupt from SysTick 
 Arguments: No
 Return:   No
 Notes: Every second sends message by USART
 **************************************************************************************************/
 /**************************************************************************************************
-Описание: Прерывание от TIM
+Описание: Прерывание от SysTick
 Аргументы: Нет
 Возврат:   Нет
 Замечания: Посылает сообщение по USART каждую секунду
 **************************************************************************************************/
-void TIM1_IRQHandler(void)
+void SysTick_Handler(void)
 {
   int16_t speed = motor_speed_getSpeed();
   USART_SendData(USART1, speed);
   // Clear interrupt bit
-  TIM_ClearITPendingBit(TIM1, TIM_IT_Update);
+  //TIM_ClearITPendingBit(TIM1, TIM_IT_Update);
 }
-// классический ассерт для STM32
-//#ifdef USE_FULL_ASSERT
-//void assert_failed(uint8_t * file, uint32_t line)
-//{ 
-//  /* User can add his own implementation to report the file name and line number,
-//   ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-//   
-//  (void)file;
-//  (void)line;
-
-//  __disable_irq();
-//  while(1)
-//  {
-//    // это ассемблерная инструкция "отладчик, стой тут"
-//    // если вы попали сюда, значит вы ошиблись в параметрах. Смотрите в call stack
-//    __BKPT(0xAB);
-//  }
-//}
-//#endif
