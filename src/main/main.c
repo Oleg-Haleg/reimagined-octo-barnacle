@@ -27,6 +27,8 @@ Notes: Peripherals used: USART1, ADC1, TIM1, GPIO
 // TIM1
 // GPIO
 
+//lets have fun
+
 void init_GPIO(void);
 void init_TIM1(void);
 void init_ADC1(void);
