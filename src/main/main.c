@@ -1,32 +1,27 @@
 /*******************************************************************************************************
 Definition: The main file for h/w on programming microcontrollers
-Developer: Trishin Vadim
+Developer: Trishin Vadim & Sannikov Andrey
 Notes: Peripherals used: USART1, ADC1, TIM1, GPIO
 *******************************************************************************************************/
 /*******************************************************************************************************
 Описание: Основной файл для домашней работы по программированию микроконтроллеров
-Разработчик: Тришин Вадим
+Разработчик: Тришин Вадим и Санников Андрей
 Заметки: Используемая перефирия: USART1, ADC1, TIM1, GPIO
 *******************************************************************************************************/
 
 #include "mcu_support_package/inc/stm32f10x.h"
-#include <stm32f10x.h>
+//#include <stm32f10x.h>
 //#include "stm32f10x_gpio.h"
 //#include "stm32f10x_rcc.h"
+//#include "stm32f10x_adc.h"
 //#include <string.h>
 
-#include "debug/debug.h"
-#include "motor_voltage/motor_voltage.h"
-#include "motor_speed/motor_speed.h"
-#include "control/control.h"
-
-// USART1
-// ADC1
-// TIM1
-// GPIO
+#include "lab_functions/debug.h"
+#include "lab_functions/motor_voltage.h"
+#include "lab_functions/motor_speed.h"
+#include "lab_functions/control.h"
 
 void init_GPIO(void);
-void init_TIM1(void);
 void init_ADC1(void);
 /***************************************************************************************************
 Global functions
@@ -38,9 +33,12 @@ Global functions
 int main()
 {  
   __disable_irq();
+  int16_t speed;
   __enable_irq();
   while(1)
   {
+    speed = mem_speed(0, false);
+    control_run(speed);
   }
   return 0;
 }
