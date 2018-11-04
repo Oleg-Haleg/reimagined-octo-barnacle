@@ -11,14 +11,15 @@ Notes: Peripherals used: USART1, ADC1, TIM1, GPIO
 
 #include "mcu_support_package/inc/stm32f10x.h"
 #include <stm32f10x.h>
-//#include "stm32f10x_gpio.h"
-//#include "stm32f10x_rcc.h"
+#include "stm32f10x_gpio.h"
+#include "stm32f10x_rcc.h"
+//#include "stm32f10x_adc.h"
 //#include <string.h>
 
-#include "debug/debug.h"
-#include "motor_voltage/motor_voltage.h"
-#include "motor_speed/motor_speed.h"
-#include "control/control.h"
+#include "lab_functions/debug.h"
+#include "lab_functions/motor_voltage.h"
+#include "lab_functions/motor_speed.h"
+#include "lab_functions/control.h"
 
 // USART1
 // ADC1
@@ -38,9 +39,12 @@ Global functions
 int main()
 {  
   __disable_irq();
+  int16_t speed;
   __enable_irq();
   while(1)
   {
+    speed = mem_speed(0, false);
+    control_run(speed);
   }
   return 0;
 }

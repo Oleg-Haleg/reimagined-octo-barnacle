@@ -9,8 +9,13 @@ Notes:
 Заметки: 
 *******************************************************************************************************/
 #include "debug.h"
+#include "control.h"
+#include "motor_speed.h"
 #include <stm32f10x.h>
-//#include "stm32f10x_usart.h"
+#include "stm32f10x_rcc.h"
+#include "stm32f10x_usart.h"
+#include "stm32f10x_tim.h"
+#include "stm32f10x_gpio.h"
 
 /***************************************************************************************************
 Local defines
@@ -52,137 +57,153 @@ Notes: To communicate with the terminal
 Возврат:   Нет
 Замечания: Для обмена данными с терминалом
 **************************************************************************************************/
-void init_USART1(void)
+void debug_init(void)
 {
+  //*************** Initialize pins for USART
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA , ENABLE);
 	GPIO_InitTypeDef structGPIO;
-  //GPIO_StructInit(&structGPIO);
-	
+
 	structGPIO.GPIO_Speed = GPIO_Speed_2MHz;
-	
-  // USART1_TX, TIM1_CH2
+  // USART1_TX
   structGPIO.GPIO_Pin  = GPIO_Pin_9;
   structGPIO.GPIO_Mode = GPIO_Mode_AF_PP;
   GPIO_Init(GPIOA, &structGPIO);
-  // USART1_RX, TIM1_CH3
+  // USART1_RX
   structGPIO.GPIO_Pin  = GPIO_Pin_10; 
   structGPIO.GPIO_Mode = GPIO_Mode_IN_FLOATING;
   GPIO_Init(GPIOA, &structGPIO);
 	
-  // USART initialization
+  //*************** USART initialization
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1 , ENABLE);
-  
   USART_InitTypeDef structUSART;
   
   USART_StructInit(&structUSART);
   structUSART.USART_BaudRate = 9600; // Is it correct baud?
   USART_Init(USART1, &structUSART);
   
-  USART_ITConfig(USART1, USART_IT_RXNE, ENABLE); // Turns on RX interrupt
-  //USART_ITConfig(USART1, USART_IT_TXE, ENABLE);
+  // Turns on RX interrupt
+  USART_ITConfig(USART1, USART_IT_RXNE, ENABLE); 
+//  USART_ITConfig(USART1, USART_IT_TXE, ENABLE);
 	NVIC_EnableIRQ(USART1_IRQn);
   
   USART_Cmd(USART1, ENABLE);
-}
-
-/**************************************************************************************************
-Definition: Initializating TIM 
-Arguments: No
-Return:   No
-Notes:
-**************************************************************************************************/
-/**************************************************************************************************
-Описание: Инициализация TIM 
-Аргументы: Нет
-Возврат:   Нет
-Замечания:
-**************************************************************************************************/
-void init_TIM1(void)
-{
-	const uint16_t period = 1000;
-	const uint16_t freq = 1000;
+  
+  //*************** Initializating TIM 
+  const uint16_t period = 1000; // Period 1s (period = 1000 ticks of timer i.e. 1 seconds)
+	const uint16_t freq = 1000; // Frequency 1ms (1 timer tick per 1 milisecond)
 	
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1,ENABLE);
   
 	TIM_TimeBaseInitTypeDef structTIM;
-    
-	structTIM.TIM_ClockDivision = TIM_CKD_DIV1;
-	structTIM.TIM_CounterMode = TIM_CounterMode_Up;
-	structTIM.TIM_Period = period - 1; // period 1ms ?
-	structTIM.TIM_Prescaler = SystemCoreClock / freq - 1; // frequency 1ms
-	structTIM.TIM_RepetitionCounter = 0;
-	
+  TIM_TimeBaseStructInit(&structTIM);
+	structTIM.TIM_Period = period - 1;
+	structTIM.TIM_Prescaler = SystemCoreClock / freq - 1;
 	TIM_TimeBaseInit(TIM1, &structTIM);
-	
+	 
+  // Configure timer on interrupting by update 
 	TIM_ITConfig(TIM1, TIM_IT_Update, ENABLE);
-	
-	//NVIC_SetPriority(TIM1_UP_IRQn, 2);
+//	NVIC_SetPriority(TIM1_UP_IRQn, 2);
+  // Enable interrupting from TIM1
 	NVIC_EnableIRQ(TIM1_UP_IRQn);
 	
+  // Turns on timer
 	TIM_Cmd(TIM1, ENABLE);
-  
-  //TIM_OC1Init(TIM1, &);
 }
 
+/**************************************************************************************************
+Definition: Memorize speed
+Arguments: Speed (-2048..2047), memorizing flag (if false just returns value of speed)
+Return:   Speed value
+Notes:
+**************************************************************************************************/
+/**************************************************************************************************
+Описание: Запоминание скорости
+Аргументы: Скорость от (-2048 до 2047), флаг запоминания (если false - просто возвращает значение скорости)
+Возврат:   Значение скорости
+Замечания:
+**************************************************************************************************/
+int16_t mem_speed (int16_t speed, bool memorize)
+{
+  static int16_t memorizedSpeed;
+  if (memorize)
+  {
+    if (speed >= -2048 && speed <= 2047)
+    {
+      memorizedSpeed = speed;
+    }
+  }
+  return memorizedSpeed;
+}
 /**************************************************************************************************
 Definition: Interrupt from USART 
 Arguments: No
 Return:   No
-Notes: Waiting for new messageand setting new speed if value in message = -2048..2047
+Notes: Waiting for new message and meorizing new speed if value in message = -2048..2047
 **************************************************************************************************/
 /**************************************************************************************************
 Описание: Прерывание от USART
 Аргументы: Нет
 Возврат:   Нет
-Замечания: Ожидание нового сообщения и установка скорости, если значение в сообщении = -2048..2047
+Замечания: Ожидание нового сообщения и запоминание скорости, если значение в сообщении = -2048..2047
 **************************************************************************************************/
 void USART1_IRQHandler(void)
 {
-  // Stops timer
-  // Checks if 'b' received (need to remember it, maybe static variable)
-  // Resumes timer if not
+  static bool waitForVelocity = false; // Flag to remember if previous message was 'b'
   
-  // If previous message was 'b', then checks if new message = -2048..2047
-  // If yes - new speed = message value
-  // If no - speed doesn't change
-  // Resumes timer
+  // Make received data signed (must work, but have little doubths)
+  int16_t receivedData = (int16_t)(USART_ReceiveData(USART1));
+  if (waitForVelocity)
+  {
+    if (receivedData >= -2048 && receivedData <= 2047)
+    {
+      mem_speed(receivedData, true);
+    }
+    TIM_Cmd(TIM1, ENABLE);
+    waitForVelocity = false;
+  }
+  else if (receivedData == 'b')
+  {
+    TIM_Cmd(TIM1, DISABLE);
+    waitForVelocity = true;
+  }
 }
 
 /**************************************************************************************************
 Definition: Interrupt from TIM 
 Arguments: No
 Return:   No
-Notes: Sends message by USART
+Notes: Every second sends message by USART
 **************************************************************************************************/
 /**************************************************************************************************
 Описание: Прерывание от TIM
 Аргументы: Нет
 Возврат:   Нет
-Замечания: Посылает сообщение по USART
+Замечания: Посылает сообщение по USART каждую секунду
 **************************************************************************************************/
 void TIM1_IRQHandler(void)
 {
-  // Each second sends speed value
-  // speed = motor_speed_getSpeed(); // Don't use this function
-  // USART_SendData(USART1, speed);
+  int16_t speed = motor_speed_getSpeed();
+  USART_SendData(USART1, speed);
+  // Clear interrupt bit
+  TIM_ClearITPendingBit(TIM1, TIM_IT_Update);
 }
 // классический ассерт для STM32
-#ifdef USE_FULL_ASSERT
-void assert_failed(uint8_t * file, uint32_t line)
-{ 
-    /* User can add his own implementation to report the file name and line number,
-     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-     
-    (void)file;
-    (void)line;
+//#ifdef USE_FULL_ASSERT
+//void assert_failed(uint8_t * file, uint32_t line)
+//{ 
+//  /* User can add his own implementation to report the file name and line number,
+//   ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+//   
+//  (void)file;
+//  (void)line;
 
-    __disable_irq();
-    while(1)
-    {
-        // это ассемблерная инструкция "отладчик, стой тут"
-        // если вы попали сюда, значит вы ошиблись в параметрах. Смотрите в call stack
-        __BKPT(0xAB);
-    }
-}
-#endif
+//  __disable_irq();
+//  while(1)
+//  {
+//    // это ассемблерная инструкция "отладчик, стой тут"
+//    // если вы попали сюда, значит вы ошиблись в параметрах. Смотрите в call stack
+//    __BKPT(0xAB);
+//  }
+//}
+//#endif
