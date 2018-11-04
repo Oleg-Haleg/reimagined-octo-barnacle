@@ -132,15 +132,41 @@ Return:   No
 Notes: Waiting for new messageand setting new speed if value in message = -2048..2047
 **************************************************************************************************/
 /**************************************************************************************************
-Описание: Прерывание от АЦП
+Описание: Прерывание от USART
 Аргументы: Нет
 Возврат:   Нет
 Замечания: Ожидание нового сообщения и установка скорости, если значение в сообщении = -2048..2047
 **************************************************************************************************/
 void USART1_IRQHandler(void)
 {
+  // Stops timer
+  // Checks if 'b' received (need to remember it, maybe static variable)
+  // Resumes timer if not
+  
+  // If previous message was 'b', then checks if new message = -2048..2047
+  // If yes - new speed = message value
+  // If no - speed doesn't change
+  // Resumes timer
 }
 
+/**************************************************************************************************
+Definition: Interrupt from TIM 
+Arguments: No
+Return:   No
+Notes: Sends message by USART
+**************************************************************************************************/
+/**************************************************************************************************
+Описание: Прерывание от TIM
+Аргументы: Нет
+Возврат:   Нет
+Замечания: Посылает сообщение по USART
+**************************************************************************************************/
+void TIM1_IRQHandler(void)
+{
+  // Each second sends speed value
+  // speed = motor_speed_getSpeed(); // Don't use this function
+  // USART_SendData(USART1, speed);
+}
 // классический ассерт для STM32
 #ifdef USE_FULL_ASSERT
 void assert_failed(uint8_t * file, uint32_t line)
