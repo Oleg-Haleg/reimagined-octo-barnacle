@@ -1,4 +1,4 @@
-/*******************************************************************************************************
+﻿/*******************************************************************************************************
 Definition: File to set new voltage on motor
 Developer: Trishin Vadim
 Notes: 
@@ -102,26 +102,4 @@ void TIM1_IRQHandler()
 void motor_voltage_setVoltage(int16_t voltage)
 {
 }
-<<<<<<< HEAD
 
-// классический ассерт для STM32
-#ifdef USE_FULL_ASSERT
-void assert_failed(uint8_t * file, uint32_t line)
-{ 
-    /* User can add his own implementation to report the file name and line number,
-     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-     
-    (void)file;
-    (void)line;
-
-    __disable_irq();
-    while(1)
-    {
-        // это ассемблерная инструкция "отладчик, стой тут"
-        // если вы попали сюда, значит вы ошиблись в параметрах. Смотрите в call stack
-        __BKPT(0xAB);
-    }
-}
-#endif
-=======
->>>>>>> aca289fd494e608515624d4abe1bf87572791c6b
