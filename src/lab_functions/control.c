@@ -4,11 +4,12 @@ Developer: Trishin Vadim
 Notes: 
 *******************************************************************************************************/
 /*******************************************************************************************************
-Описание: Файл для установки напряжения на мотор
+Описание: Файл с ПИД-регулятором
 Разработчик: Тришин Вадим
 Заметки: 
 *******************************************************************************************************/
 #include "control.h"
+#include "motor_speed.h"
 #include <stm32f10x.h>
 
 /***************************************************************************************************
@@ -40,18 +41,40 @@ Global functions
 ***************************************************************************************************/
 
 /**************************************************************************************************
-Definition: Get the control signal value depending on the control error
+Definition: Get the control signal value depending on the desired velocity
 Arguments: Control error
 Return:   Control signal value
 Notes: 
 **************************************************************************************************/
 /**************************************************************************************************
-Описание: Получение значения управляющего сигнала на основе значения ошибки управления
+Описание: Получение значения управляющего сигнала на основе желаемой скорости
 Аргументы: Значение ошибки управления
 Возврат:   Значение управляющего сигнала
 Замечания: 
 **************************************************************************************************/
-int16_t control_run(int16_t mistake)
+int16_t control_run(int16_t desiredSpeed)
 {
-  return 0; // Must return control signal
+  const int16_t proportionalCoefficent = 0;
+  const int16_t integralCoefficent     = 0; // Reduced (приведенный)
+  const int16_t differenceCoefficent   = 0; // Reduced (приведенный)
+  
+  static int16_t previousError = 0;
+  static int16_t integral      = 0;
+  
+  int16_t controlSignal = 0;
+  int16_t difference    = 0;
+  int16_t currentError  = 0;
+  
+  currentError  = desiredSpeed - motor_speed_getSpeed();
+  integral     += currentError;
+  difference    = currentError - previousError;
+  
+  controlSignal  = difference * differenceCoefficent;
+  controlSignal += integral * integralCoefficent;
+  controlSignal += currentError;
+  controlSignal *= proportionalCoefficent;
+  
+  previousError = currentError;
+  
+  return controlSignal;
 }
