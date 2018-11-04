@@ -1,4 +1,4 @@
-/*******************************************************************************************************
+﻿/*******************************************************************************************************
 Definition: The main file for h/w on programming microcontrollers
 Developer: Trishin Vadim
 Notes: Peripherals used: USART1, ADC1, TIM1, GPIO
@@ -15,6 +15,7 @@ Notes: Peripherals used: USART1, ADC1, TIM1, GPIO
 #include "stm32f10x_rcc.h"
 //#include "stm32f10x_adc.h"
 //#include <string.h>
+//kvakazyabra
 
 #include "lab_functions/debug.h"
 #include "lab_functions/motor_voltage.h"
