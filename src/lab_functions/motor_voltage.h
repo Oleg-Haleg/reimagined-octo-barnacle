@@ -4,3 +4,4 @@
 #include <stdint.h>
 
 void motor_voltage_setVoltage(int16_t voltage);
+void PWM_init(void);
