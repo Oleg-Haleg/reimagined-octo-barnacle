@@ -102,6 +102,7 @@ void TIM1_IRQHandler()
 void motor_voltage_setVoltage(int16_t voltage)
 {
 }
+<<<<<<< HEAD
 
 // классический ассерт для STM32
 #ifdef USE_FULL_ASSERT
@@ -122,3 +123,5 @@ void assert_failed(uint8_t * file, uint32_t line)
     }
 }
 #endif
+=======
+>>>>>>> aca289fd494e608515624d4abe1bf87572791c6b
