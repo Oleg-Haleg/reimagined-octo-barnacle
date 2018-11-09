@@ -66,8 +66,8 @@ int16_t control_run(int16_t desiredSpeed)
   int16_t currentError  = 0;
   
   currentError  = desiredSpeed - motor_speed_getSpeed();
-  // Придумать, как обнулять интеграл (можно запоминать желаемую скорость и если она меняется, то обнулять интеграл)
-  integral     += currentError; 
+  // Is it good integral?
+  integral      = currentError + previousError; 
   difference    = currentError - previousError;
   
   controlSignal  = difference * differenceCoefficent;
