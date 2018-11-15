@@ -67,7 +67,7 @@ int16_t control_run(int16_t desiredSpeed)
   
   currentError  = desiredSpeed - motor_speed_getSpeed();
   // Is it good integral?
-  integral      = currentError + previousError; 
+  integral     += currentError; 
   difference    = currentError - previousError;
   
   controlSignal  = difference * differenceCoefficent;
