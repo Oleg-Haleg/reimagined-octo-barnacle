@@ -61,7 +61,7 @@ void debug_init(void)
 {
   //*************** Initialize pins for USART
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA , ENABLE);
-	GPIO_InitTypeDef structGPIO;
+  GPIO_InitTypeDef structGPIO;
 
 	structGPIO.GPIO_Speed = GPIO_Speed_2MHz;
   // USART1_TX
@@ -85,14 +85,14 @@ void debug_init(void)
   // Turns on RX interrupt
   USART_ITConfig(USART1, USART_IT_RXNE, ENABLE); 
 //  USART_ITConfig(USART1, USART_IT_TXE, ENABLE);
-	NVIC_SetPriority(USART1_IRQn, 2);
-	NVIC_EnableIRQ(USART1_IRQn);
+  NVIC_SetPriority(USART1_IRQn, 2);
+  NVIC_EnableIRQ(USART1_IRQn);
   
   USART_Cmd(USART1, ENABLE);
   
   //*************** Initializating SysTick
   SysTick_Config(SystemCoreClock); // One timer tick per second
-	NVIC_SetPriority(SysTick_IRQn, 4);
+  NVIC_SetPriority(SysTick_IRQn, 4);
 
   //*************** Initializating TIM 
 //  const uint16_t period = 1000; // Period 1s (period = 1000 ticks of timer i.e. 1 seconds)

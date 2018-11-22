@@ -52,7 +52,7 @@ Notes:
 Возврат:   Значение управляющего сигнала
 Замечания: 
 **************************************************************************************************/
-int16_t control_run(int16_t desiredSpeed)
+int16_t control_run(int16_t mistake)
 {
   const int16_t proportionalCoefficent = 0;
   const int16_t integralCoefficent     = 0; // Reduced (приведенный)
