@@ -63,7 +63,7 @@ void debug_init(void)
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA , ENABLE);
   GPIO_InitTypeDef structGPIO;
 
-	structGPIO.GPIO_Speed = GPIO_Speed_2MHz;
+  structGPIO.GPIO_Speed = GPIO_Speed_2MHz;
   // USART1_TX
   structGPIO.GPIO_Pin  = GPIO_Pin_9;
   structGPIO.GPIO_Mode = GPIO_Mode_AF_PP;
@@ -79,7 +79,8 @@ void debug_init(void)
   USART_InitTypeDef structUSART;
   
   USART_StructInit(&structUSART);
-  structUSART.USART_BaudRate = 9600; // Is it correct baud?
+  // Is it correct baud?
+  structUSART.USART_BaudRate = 9600;
   USART_Init(USART1, &structUSART);
   
   // Turns on RX interrupt
@@ -91,29 +92,33 @@ void debug_init(void)
   USART_Cmd(USART1, ENABLE);
   
   //*************** Initializating SysTick
-  SysTick_Config(SystemCoreClock); // One timer tick per second
-  NVIC_SetPriority(SysTick_IRQn, 4);
+  // One timer tick per second
+//  SysTick_Config(SystemCoreClock/1);
+//  NVIC_SetPriority(SysTick_IRQn, 4);
+//  NVIC_EnableIRQ(SysTick_IRQn);
 
-  //*************** Initializating TIM 
-//  const uint16_t period = 1000; // Period 1s (period = 1000 ticks of timer i.e. 1 seconds)
-//	const uint16_t freq = 1000; // Frequency 1ms (1 timer tick per 1 milisecond)
-//	
-//  RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1,ENABLE);
-//  
-//	TIM_TimeBaseInitTypeDef structTIM;
-//  TIM_TimeBaseStructInit(&structTIM);
-//	structTIM.TIM_Period = period - 1;
-//	structTIM.TIM_Prescaler = SystemCoreClock / freq - 1;
-//	TIM_TimeBaseInit(TIM1, &structTIM);
-//	 
-//  // Configure timer on interrupting by update 
-//	TIM_ITConfig(TIM1, TIM_IT_Update, ENABLE);
-////	NVIC_SetPriority(TIM1_UP_IRQn, 2);
-//  // Enable interrupting from TIM1
-//	NVIC_EnableIRQ(TIM1_UP_IRQn);
-//	
-//  // Turns on timer
-//	TIM_Cmd(TIM1, ENABLE);
+  //*************** Initializating TIM
+  // Frequency 1ms (1 timer tick per 1 milisecond)
+	const uint16_t freq = 1000;
+  // Period 1s (period = 1000 ticks of timer i.e. 1 seconds)
+  const uint16_t period = 1000;
+	
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1,ENABLE);
+  
+	TIM_TimeBaseInitTypeDef structTIM;
+  TIM_TimeBaseStructInit(&structTIM);
+	structTIM.TIM_Period = period - 1;
+	structTIM.TIM_Prescaler = SystemCoreClock / freq - 1;
+	TIM_TimeBaseInit(TIM1, &structTIM);
+	 
+  // Configure timer on interrupting by update 
+	TIM_ITConfig(TIM1, TIM_IT_Update, ENABLE);
+//	NVIC_SetPriority(TIM1_UP_IRQn, 2);
+  // Enable interrupting from TIM1
+	NVIC_EnableIRQ(TIM1_UP_IRQn);
+	
+  // Turns on timer
+	TIM_Cmd(TIM1, ENABLE);
 }
 
 /**************************************************************************************************
@@ -124,7 +129,8 @@ Notes:
 **************************************************************************************************/
 /**************************************************************************************************
 Описание: Запоминание скорости
-Аргументы: Скорость от (-2048 до 2047), флаг запоминания (если false - просто возвращает значение скорости)
+Аргументы: Скорость от (-2048 до 2047)
+           Флаг запоминания (если false - просто возвращает значение скорости)
 Возврат:   Значение скорости
 Замечания:
 **************************************************************************************************/
@@ -154,7 +160,8 @@ Notes: Waiting for new message and meorizing new speed if value in message = -20
 **************************************************************************************************/
 void USART1_IRQHandler(void)
 {
-  static bool waitForVelocity = false; // Flag to remember if previous message was 'b'
+  // Flag to remember if previous message was 'b'
+  static bool waitForVelocity = false;
   
   // Make received data signed (must work, but have little doubths)
   int16_t receivedData = (int16_t)(USART_ReceiveData(USART1));
@@ -165,13 +172,13 @@ void USART1_IRQHandler(void)
       mem_speed(receivedData, true);
     }
     NVIC_EnableIRQ(SysTick_IRQn);
-    //TIM_Cmd(TIM1, ENABLE);
+//    TIM_Cmd(TIM1, ENABLE);
     waitForVelocity = false;
   }
   else if (receivedData == 'b')
   {
     NVIC_DisableIRQ(SysTick_IRQn);
-    //TIM_Cmd(TIM1, DISABLE);
+//    TIM_Cmd(TIM1, DISABLE);
     waitForVelocity = true;
   }
 }
@@ -192,6 +199,12 @@ void SysTick_Handler(void)
 {
   int16_t speed = motor_speed_getSpeed();
   USART_SendData(USART1, speed);
-  // Clear interrupt bit
-  //TIM_ClearITPendingBit(TIM1, TIM_IT_Update);
+  //Clear interrupt bit
+//  TIM_ClearITPendingBit(TIM1, TIM_IT_Update);
+}
+
+void TIM1_IRQHandler(void)
+{
+  int16_t speed = motor_speed_getSpeed();
+  USART_SendData(USART1, speed);    
 }

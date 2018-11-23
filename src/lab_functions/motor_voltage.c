@@ -95,10 +95,10 @@ void PWM_init()
 Возврат:   Нет
 Замечания: Измеряется в мВ ?
 **************************************************************************************************/
-void TIM1_IRQHandler()
-{	
+//void TIM1_IRQHandler()
+//{	
 
-} 
+//} 
 void motor_voltage_setVoltage(int16_t voltage)
 {
 }

@@ -47,7 +47,8 @@ Return:   Control signal value
 Notes: 
 **************************************************************************************************/
 /**************************************************************************************************
-Описание: Получение значения управляющего сигнала на основе желаемой скорости
+Описание: Получение значения управляющего сигнала 
+          на основе ошибки между желаемой и действительной скоростью
 Аргументы: Значение ошибки управления
 Возврат:   Значение управляющего сигнала
 Замечания: 
@@ -55,8 +56,10 @@ Notes:
 int16_t control_run(int16_t mistake)
 {
   const int16_t proportionalCoefficent = 0;
-  const int16_t integralCoefficent     = 0; // Reduced (приведенный)
-  const int16_t differenceCoefficent   = 0; // Reduced (приведенный)
+  // Reduced (приведенный)
+  const int16_t integralCoefficent     = 0;
+  // Reduced (приведенный)
+  const int16_t differenceCoefficent   = 0;
   
   static int16_t previousError = 0;
   static int16_t integral      = 0;
@@ -65,7 +68,8 @@ int16_t control_run(int16_t mistake)
   int16_t difference    = 0;
   int16_t currentError  = 0;
   
-  currentError  = desiredSpeed - motor_speed_getSpeed();
+//  currentError  = desiredSpeed - motor_speed_getSpeed();
+  currentError = mistake;
   // Is it good integral?
   integral     += currentError; 
   difference    = currentError - previousError;

@@ -33,38 +33,24 @@ Global functions
 int main()
 {  
   __disable_irq();
-  int16_t speed;
+//  int16_t speed   = 0;
+//  int16_t signal = 0;
+//  int16_t mistake = 0;
+  debug_init();
   __enable_irq();
   while(1)
   {
-    speed = mem_speed(0, false);
-    control_run(speed);
+    // Request speed
+//    speed = mem_speed(0, false);
+    // Count mistake
+//    mistake = mem_speed(0, false) - motor_speed_getSpeed();
+    // Get control signal from PID
+//    signal = control_run(mistake);
+    // Convert signal to new voltage
+    
+    // Set new voltage on motor
   }
   return 0;
-}
-
-//
-void init_GPIO(void)
-{
-  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA , ENABLE);
-  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB , ENABLE);
-  
-  GPIO_InitTypeDef structGPIO;
-  //GPIO_StructInit(&structGPIO);
-	
-	// Initialize speed once for all pins
-	structGPIO.GPIO_Speed = GPIO_Speed_2MHz;
-	
-	// Add GPIOA 8 and comment it
-  // USART1_TX, TIM1_CH2
-//  structGPIO.GPIO_Pin  = GPIO_Pin_8;
-//  structGPIO.GPIO_Mode = GPIO_Mode_Out_PP;
-//  GPIO_Init(GPIOA, &structGPIO);
-	
-  // USART1_CTS, TIM1_CH4
-  structGPIO.GPIO_Pin  = GPIO_Pin_11; 
-  structGPIO.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-  GPIO_Init(GPIOA, &structGPIO);	
 }
 
 //
@@ -79,10 +65,6 @@ void init_ADC1(void)
 	// Initialize speed once for all pins
 	structGPIO.GPIO_Speed = GPIO_Speed_2MHz;
 	
-  // ADC1_IN7, remap(TIM1_CH1N)
-  structGPIO.GPIO_Pin  = GPIO_Pin_7;
-  structGPIO.GPIO_Mode = GPIO_Mode_AIN;
-  GPIO_Init(GPIOA, &structGPIO);
 	// ADC1_IN8, remap(TIM1_CH2N)
   structGPIO.GPIO_Pin  = GPIO_Pin_0; 
   structGPIO.GPIO_Mode = GPIO_Mode_AIN;
